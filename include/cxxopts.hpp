@@ -1452,6 +1452,9 @@ namespace cxxopts
     }
 
     ParseResult
+    parse(int argc, const wchar_t* const* argv);
+
+    ParseResult
     parse(int argc, const char* const* argv);
 
     OptionAdder
@@ -1958,6 +1961,39 @@ Options::parse_positional(std::initializer_list<std::string> options)
 {
   parse_positional(std::vector<std::string>(options));
 }
+
+#ifdef _WIN32
+inline
+std::string
+convert_to_utf8(const std::wstring path)
+{
+    std::string string;
+    string.resize(path.size() + 1);
+    if (!WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, (LPSTR)string.data(), (uint32_t)(string.size()), NULL, NULL))
+        return std::string("");
+    string.resize(string.size() - 1);
+    return string;
+}
+
+inline
+ParseResult
+Options::parse(int argc, const wchar_t* const* argv)
+{
+    std::vector<std::string> list;
+    std::vector<const char*> args;
+    list.resize(argc);
+    for (int i = 0; i < argc; ++i)
+    {
+        list[i] = convert_to_utf8(argv[i]);
+        args.push_back(list[i].data());
+    }
+    const char** argsptr = args.data();
+
+    OptionParser parser(*m_options, m_positional, m_allow_unrecognised);
+
+    return parser.parse(argc, argsptr);
+}
+#endif
 
 inline
 ParseResult
