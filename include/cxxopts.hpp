@@ -1968,10 +1968,14 @@ std::string
 convert_to_utf8(const std::wstring path)
 {
     std::string string;
-    string.resize(path.size() + 1);
-    if (!WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, (LPSTR)string.data(), (uint32_t)(string.size()), NULL, NULL))
-        return std::string("");
-    string.resize(string.size() - 1);
+    int count = WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, nullptr, 0, NULL, NULL);
+    if (count)
+    {
+        string.resize(count);
+        count = WideCharToMultiByte(CP_UTF8, 0, path.c_str(), -1, string.data(),
+            static_cast<uint32_t>(string.size()), NULL, NULL);
+        if (count) string.resize(count - 1);
+    }
     return string;
 }
 
