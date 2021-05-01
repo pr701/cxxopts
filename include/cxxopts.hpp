@@ -46,6 +46,11 @@ THE SOFTWARE.
 #define CXXOPTS_HAS_OPTIONAL
 #endif
 
+#ifdef _WIN32
+#include <Windows.h>
+#include <tchar.h>
+#endif
+
 #if __cplusplus >= 201603L
 #define CXXOPTS_NODISCARD [[nodiscard]]
 #else
@@ -1451,8 +1456,10 @@ namespace cxxopts
       return *this;
     }
 
+#ifdef _WIN32
     ParseResult
     parse(int argc, const wchar_t* const* argv);
+#endif
 
     ParseResult
     parse(int argc, const char* const* argv);
